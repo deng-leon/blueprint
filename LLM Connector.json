@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
   "name": "LLM Connector",
   "id": "8232c8b6-4a96-4e25-b6ee-0d2f8ebbbe19",
-  "version": 1751986195960,
+  "version": 1751997047207,
   "description": "Invoke models and converse using AWS Bedrock.",
   "metadata": {
     "keywords": [
@@ -234,14 +234,14 @@
     },
     {
       "id": "data.newMessage",
-      "label": "Prompt",
-      "description": "Specify the user prompt",
+      "label": "KI-Prompt",
+      "description": "Hier können Sie Ihren KI-Prompt formulieren. Denken Sie an das CREATE Pattern.",
       "optional": false,
       "constraints": {
         "notEmpty": true
       },
       "feel": "optional",
-      "group": "converse",
+      "group": "configuration",
       "binding": {
         "name": "data.newMessage",
         "type": "zeebe:input"
@@ -251,7 +251,7 @@
         "equals": "converse",
         "type": "simple"
       },
-      "type": "String"
+      "type": "Text"
     },
     {
       "id": "data.maxTokens",
@@ -326,21 +326,20 @@
         "key": "resultVariable",
         "type": "zeebe:taskHeader"
       },
-      "type": "String",
+      "type": "Hidden",
       "value": "result"
     },
     {
       "id": "resultExpression",
       "label": "Result expression",
       "description": "Expression to map the response into process variables",
-      "feel": "required",
       "group": "output",
       "binding": {
         "key": "resultExpression",
         "type": "zeebe:taskHeader"
       },
-      "type": "Text",
-      "value": "={ \n  response : body.choices.message.content[1] \n}"
+      "type": "Hidden",
+      "value": "={ ai: response[2].contentList[1].text }"
     },
     {
       "id": "errorExpression",
