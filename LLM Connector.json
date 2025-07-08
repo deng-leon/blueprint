@@ -1,0 +1,384 @@
+{
+  "$schema": "https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json",
+  "name": "LLM Connector",
+  "id": "8232c8b6-4a96-4e25-b6ee-0d2f8ebbbe19",
+  "version": 1751986195960,
+  "description": "Invoke models and converse using AWS Bedrock.",
+  "metadata": {
+    "keywords": [
+      "invoke model",
+      "run inference",
+      "invokemodel API",
+      "converse API"
+    ]
+  },
+  "documentationRef": "https://docs.camunda.io/docs/components/connectors/out-of-the-box-connectors/amazon-bedrock/",
+  "category": {
+    "id": "connectors",
+    "name": "Connectors"
+  },
+  "appliesTo": [
+    "bpmn:Task"
+  ],
+  "elementType": {
+    "value": "bpmn:ServiceTask"
+  },
+  "groups": [
+    {
+      "id": "configuration",
+      "label": "Configuration"
+    }
+  ],
+  "properties": [
+    {
+      "value": "io.camunda:aws-bedrock:1",
+      "binding": {
+        "property": "type",
+        "type": "zeebe:taskDefinition"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "authentication.type",
+      "label": "Authentication",
+      "description": "Specify AWS authentication strategy. Learn more at the <a href=\"https://docs.camunda.io/docs/components/connectors/out-of-the-box-connectors/aws-lambda/#aws-authentication-types\" target=\"_blank\">documentation page</a>",
+      "value": "credentials",
+      "group": "authentication",
+      "binding": {
+        "name": "authentication.type",
+        "type": "zeebe:input"
+      },
+      "type": "Hidden",
+      "choices": [
+        {
+          "name": "Default Credentials Chain (Hybrid/Self-Managed only)",
+          "value": "defaultCredentialsChain"
+        },
+        {
+          "name": "Credentials",
+          "value": "credentials"
+        }
+      ]
+    },
+    {
+      "id": "authentication.accessKey",
+      "label": "Access key",
+      "description": "Provide an IAM access key tailored to a user, equipped with the necessary permissions",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "group": "authentication",
+      "binding": {
+        "name": "authentication.accessKey",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "authentication.type",
+        "equals": "credentials",
+        "type": "simple"
+      },
+      "type": "Hidden",
+      "value": "{{secrets.AWS_ACCESSKEY}}"
+    },
+    {
+      "id": "authentication.secretKey",
+      "label": "Secret key",
+      "description": "Provide a secret key of a user with permissions to invoke specified AWS Lambda function",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "group": "authentication",
+      "binding": {
+        "name": "authentication.secretKey",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "authentication.type",
+        "equals": "credentials",
+        "type": "simple"
+      },
+      "type": "Hidden",
+      "value": "{{secrets.AWS_SECRETKEY}}"
+    },
+    {
+      "id": "configuration.region",
+      "label": "Region",
+      "description": "Specify the AWS region",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "group": "configuration",
+      "binding": {
+        "name": "configuration.region",
+        "type": "zeebe:input"
+      },
+      "type": "Hidden",
+      "value": "{{secrets.AWS_REGION}}"
+    },
+    {
+      "id": "configuration.endpoint",
+      "label": "Endpoint",
+      "description": "Specify endpoint if need to use custom endpoint",
+      "optional": true,
+      "group": "configuration",
+      "binding": {
+        "name": "configuration.endpoint",
+        "type": "zeebe:input"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "action",
+      "label": "Action",
+      "value": "converse",
+      "group": "action",
+      "binding": {
+        "name": "action",
+        "type": "zeebe:input"
+      },
+      "type": "Hidden",
+      "choices": [
+        {
+          "name": "Invoke Model",
+          "value": "invokeModel"
+        },
+        {
+          "name": "Converse",
+          "value": "converse"
+        }
+      ]
+    },
+    {
+      "id": "data.modelId0",
+      "label": "Model ID",
+      "description": "Specify the model ID. Details in the <a href=\"https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html\" target=\"_blank\">documentation</a>",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "group": "invokeModel",
+      "binding": {
+        "name": "data.modelId",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "invokeModel",
+        "type": "simple"
+      },
+      "type": "Hidden",
+      "value": "{{secrets.BEDROCK_CLAUDE_SONNET_4_MODEL_ID}}"
+    },
+    {
+      "id": "data.payload",
+      "label": "Payload",
+      "description": "Specify the payload. Details in the <a href=\"https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html\" target=\"_blank\">documentation</a>",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "feel": "required",
+      "group": "invokeModel",
+      "binding": {
+        "name": "data.payload",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "invokeModel",
+        "type": "simple"
+      },
+      "type": "String",
+      "value": "={\n    \"prompt\": prompt\n}"
+    },
+    {
+      "id": "data.messagesHistory",
+      "label": "Message History",
+      "description": "Specify the message history, when previous context is needed",
+      "optional": true,
+      "group": "converse",
+      "binding": {
+        "name": "data.messagesHistory",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "data.modelId1",
+      "label": "Model ID",
+      "description": "Specify the model ID. Details in the <a href=\"https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html\" target=\"_blank\">documentation</a>",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "group": "converse",
+      "binding": {
+        "name": "data.modelId",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "Hidden",
+      "value": "{{secrets.BEDROCK_CLAUDE_SONNET_4_MODEL_ID}}"
+    },
+    {
+      "id": "data.newMessage",
+      "label": "Prompt",
+      "description": "Specify the user prompt",
+      "optional": false,
+      "constraints": {
+        "notEmpty": true
+      },
+      "feel": "optional",
+      "group": "converse",
+      "binding": {
+        "name": "data.newMessage",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "String"
+    },
+    {
+      "id": "data.maxTokens",
+      "label": "Max token returned",
+      "optional": true,
+      "group": "converse",
+      "binding": {
+        "name": "data.maxTokens",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "data.temperature",
+      "label": "Temperature",
+      "optional": true,
+      "group": "converse",
+      "binding": {
+        "name": "data.temperature",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "data.topP",
+      "label": "top P",
+      "optional": true,
+      "group": "converse",
+      "binding": {
+        "name": "data.topP",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "data.newDocuments",
+      "label": "documents",
+      "optional": true,
+      "group": "converse",
+      "binding": {
+        "name": "data.newDocuments",
+        "type": "zeebe:input"
+      },
+      "condition": {
+        "property": "action",
+        "equals": "converse",
+        "type": "simple"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "resultVariable",
+      "label": "Result variable",
+      "description": "Name of variable to store the response in",
+      "group": "output",
+      "binding": {
+        "key": "resultVariable",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "String",
+      "value": "result"
+    },
+    {
+      "id": "resultExpression",
+      "label": "Result expression",
+      "description": "Expression to map the response into process variables",
+      "feel": "required",
+      "group": "output",
+      "binding": {
+        "key": "resultExpression",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "Text",
+      "value": "={ \n  response : body.choices.message.content[1] \n}"
+    },
+    {
+      "id": "errorExpression",
+      "label": "Error expression",
+      "description": "Expression to handle errors. Details in the <a href=\"https://docs.camunda.io/docs/components/connectors/use-connectors/\" target=\"_blank\">documentation</a>.",
+      "group": "error",
+      "binding": {
+        "key": "errorExpression",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "retryCount",
+      "label": "Retries",
+      "description": "Number of retries",
+      "value": "3",
+      "group": "retries",
+      "binding": {
+        "property": "retries",
+        "type": "zeebe:taskDefinition"
+      },
+      "type": "Hidden"
+    },
+    {
+      "id": "retryBackoff",
+      "label": "Retry backoff",
+      "description": "ISO-8601 duration to wait between retries",
+      "value": "PT0S",
+      "group": "retries",
+      "binding": {
+        "key": "retryBackoff",
+        "type": "zeebe:taskHeader"
+      },
+      "type": "Hidden"
+    }
+  ],
+  "icon": {
+    "contents": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMjkwIiBoZWlnaHQ9IjM0NSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNzYuNzI4IDkxLjI4MiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxnIHRyYW5zZm9ybT0ibWF0cml4KC4yODU3IDAgMCAuMjg1NyA3MS40MDggMjguMjYyKSIgZmlsbD0iI2UyMDA3NCI+CiAgPHBhdGggZD0ibS0zMy41OTkgMjE4Ljczdi0yMi4xOTJoLTE1LjI1NmMtMjYuMzE1IDAtMzguMzkzLTE1LjY0My0zOC4zOTMtMzguNjY1di0yMzIuNmg0LjUyNDZjNDkuMjgzIDAgODAuNTgyIDMyLjcwNyA4MC41ODIgODAuNzk3djQuMzA5MmgxOC43NDV2LTEwNy4zaC0yNjQuNTh2MTA3LjNoMTguNzQ1di00LjMwOTJjMC00OC4wOSAzMS4yOTgtODAuNzk3IDgwLjU4Mi04MC43OTdoNC41MjQ2djIzMi42YzAgMjMuMDIyLTEyLjA3OCAzOC42NjUtMzguMzkzIDM4LjY2NWgtMTUuMjU2djIyLjE5MnoiLz4KICA8cGF0aCBkPSJtMTYuNjAzIDExMS40M2gtNjIuOTE0di02My4xMjloNjIuOTE0eiIvPgogIDxwYXRoIGQ9Im0tMTg1LjA3IDExMS40M2gtNjIuOTE0di02My4xMjloNjIuOTE0eiIvPgogPC9nPgo8L3N2Zz4K"
+  }
+}
